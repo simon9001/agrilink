@@ -46,6 +46,7 @@ class AppRoutes {
 
     // Dashboard routes
     dashboard: (context) => _getDashboardForRole(context),
+    dashboardDemo: (context) => const DashboardDemo(),
     farmerDashboard: (context) => const FarmerDashboard(),
     buyerDashboard: (context) => const BuyerDashboard(),
     supplierDashboard: (context) => const SupplierDashboard(),
