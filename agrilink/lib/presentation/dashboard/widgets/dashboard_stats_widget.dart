@@ -4,13 +4,13 @@ import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 
 enum Metric {
-  REVENUEUE: 1,
-    GROW: 2,
-    COMPLETED: 3,
-    CANCELLED: 4,
-    PENDING: 5,
-    REFUNDED: 6,
-    ERROR: 7,
+  REVENUE,
+  GROWTH,
+  COMPLETED,
+  CANCELLED,
+  PENDING,
+  REFUNDED,
+  ERROR,
 }
 
 class DashboardStats {
