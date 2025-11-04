@@ -11,6 +11,7 @@ import '../presentation/dashboard/buyer_dashboard.dart';
 import '../presentation/dashboard/supplier_dashboard.dart';
 import '../presentation/dashboard/expert_dashboard.dart';
 import '../presentation/dashboard/admin_dashboard.dart';
+import '../presentation/dashboard/dashboard_demo.dart';
 import '../core/user_role.dart';
 
 class AppRoutes {
