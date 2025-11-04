@@ -40,11 +40,13 @@ class DashboardStats extends StatelessWidget {
 
   Widget _buildStatsGrid() {
     return GridView.count(
-      crossAxisCount: 4,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
       crossAxisSpacing: 4.w,
-      childAspectRatio: 1.2,
+      mainAxisSpacing: 4.h,
       childAspectRatio: 1.5,
-      child: [
+      children: [
         _buildMetricCard(
           'Total Orders',
           stats['total_orders'].toString(),
