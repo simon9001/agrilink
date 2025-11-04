@@ -13,13 +13,14 @@ enum Metric {
   ERROR,
 }
 
-class DashboardStats {
+class DashboardStats extends StatelessWidget {
   final Map<String, dynamic> stats;
   final bool isFarmer;
   final bool isExpert;
   final bool isSupplier;
 
   const DashboardStats({
+    super.key,
     required this.stats,
     this.isFarmer = false,
     this.isExpert = false,
