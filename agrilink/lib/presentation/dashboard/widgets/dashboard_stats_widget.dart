@@ -67,18 +67,15 @@ class DashboardStats extends StatelessWidget {
         ),
         _buildMetricCard(
           'Revenue',
-          '\$${(100 * _getRevenuePercentage(stats['total_revenue'] / 100).toStringAsFixed(1)}%',
+          '\$${stats['total_revenue']}',
           Icons.trending_up,
           _getMetricColor(Metric.REVENUE),
         ),
         _buildMetricCard(
           'Rating',
-          '${stats['rating'].toString()}',
-          StarRating(
-            rating: stats['rating'].toDouble(),
-            size: 5.0,
-          ),
-          _getMetricColor(Metric.ROW),
+          '${stats['rating']}',
+          Icons.star,
+          _getMetricColor(Metric.COMPLETED),
         ),
       ],
     );
