@@ -16,7 +16,7 @@ import '../core/user_role.dart';
 
 class AppRoutes {
   // TODO: Add your routes here
-  static const String initial = '/';
+  static const String initial = '/dashboard/demo';
   static const String splash = '/splash-screen';
   static const String login = '/login';
   static const String socialFeed = '/social-feed';
