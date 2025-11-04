@@ -2,6 +2,7 @@
 Expert services serializers for AgriLink API.
 """
 from rest_framework import serializers
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from core.utils import format_currency, format_date
