@@ -2,6 +2,7 @@
 Marketplace serializers for AgriLink API.
 """
 from rest_framework import serializers
+from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import Point
 from django.utils import timezone
