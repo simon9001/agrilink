@@ -27,6 +27,7 @@ class AppRoutes {
 
   // Dashboard routes
   static const String dashboard = '/dashboard';
+  static const String dashboardDemo = '/dashboard/demo';
   static const String farmerDashboard = '/dashboard/farmer';
   static const String buyerDashboard = '/dashboard/buyer';
   static const String supplierDashboard = '/dashboard/supplier';
