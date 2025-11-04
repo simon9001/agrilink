@@ -49,34 +49,35 @@ class DashboardStats extends StatelessWidget {
       children: [
         _buildMetricCard(
           'Total Orders',
-          stats['total_orders'].toString(),
+          stats['total_orders']?.toString() ?? '0',
           Icons.shopping_cart,
           _getMetricColor(Metric.COMPLETED),
         ),
         _buildMetricCard(
           'Pending Orders',
-          stats['pending_orders'].toString(),
+          stats['pending_orders']?.toString() ?? '0',
           Icons.pending,
           _getMetricColor(Metric.PENDING),
         ),
         _buildMetricCard(
           'Completed',
-          stats['completed_orders'].toString(),
+          stats['completed_orders']?.toString() ?? '0',
           Icons.check_circle,
           _getMetricColor(Metric.COMPLETED),
         ),
         _buildMetricCard(
           'Revenue',
-          '\$${stats['total_revenue']}',
+          '\$${stats['total_revenue'] ?? '0'}',
           Icons.trending_up,
           _getMetricColor(Metric.REVENUE),
         ),
-        _buildMetricCard(
-          'Rating',
-          '${stats['rating']}',
-          Icons.star,
-          _getMetricColor(Metric.COMPLETED),
-        ),
+        if (isFarmer || isSupplier)
+          _buildMetricCard(
+            'Rating',
+            '${stats['rating'] ?? '0.0'}',
+            Icons.star,
+            _getMetricColor(Metric.COMPLETED),
+          ),
       ],
     );
   }
@@ -101,7 +102,7 @@ class DashboardStats extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
-              icon: icon,
+              icon,
               color: color,
               size: 8.w,
             ),
@@ -120,52 +121,15 @@ class DashboardStats extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 1.h),
-            Expanded(
-              child: Text(
-                subtitle,
-                style: AppTheme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
           ],
         ),
+      ),
     );
   }
 
   Widget _buildActivitySummary() {
     return Container(
-      height: 15.h,
       padding: EdgeInsets.all(4.w),
-      decoration: _buildDecoration('Activity Summary'),
-      child: Column(
-        children: [
-          _buildSummaryRow(
-            'Today\'s Activities',
-            '${_getMetric(Metric.REVENUE)} tasks completed',
-            _getMetricColor(Metric.REVENUE),
-          ),
-          SizedBox(height: 1.h),
-          _buildSummaryRow(
-            'Pending Tasks',
-            '${_getMetric(Metric.PENDING)} tasks',
-            _getMetricColor(Metric.PENDING),
-          ),
-          SizedBox(height: 1.h),
-          _buildSummaryRow(
-            'Completion Rate',
-            '$_getCompletionPercentage()}%',
-            _getCompletionColor(),
-          ),
-          SizedBox(height: 1.h),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDecoration(String title) {
-    return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -177,6 +141,27 @@ class DashboardStats extends StatelessWidget {
           ),
         ],
       ),
+      child: Column(
+        children: [
+          _buildSummaryRow(
+            'Today\'s Activities',
+            '${stats['today_activities'] ?? '0'} tasks completed',
+            _getMetricColor(Metric.REVENUE),
+          ),
+          SizedBox(height: 1.h),
+          _buildSummaryRow(
+            'Pending Tasks',
+            '${stats['pending_tasks'] ?? '0'} tasks',
+            _getMetricColor(Metric.PENDING),
+          ),
+          SizedBox(height: 1.h),
+          _buildSummaryRow(
+            'Completion Rate',
+            '${_getCompletionPercentage()}%',
+            _getCompletionColor(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -185,16 +170,15 @@ class DashboardStats extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+          style: AppTheme.textTheme.titleMedium?.copyWith(
             color: color,
             fontWeight: FontWeight.w600,
           ),
         ),
         Spacer(),
-        Expanded(
-          Text(
+        Text(
           value,
-          style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+          style: AppTheme.textTheme.titleMedium?.copyWith(
             color: color,
             fontWeight: FontWeight.w600,
           ),
@@ -203,161 +187,40 @@ class DashboardStats extends StatelessWidget {
     );
   }
 
-  String getCompletionPercentage() {
-    if (_dashboardData?['stats'].isEmpty) return 0;
+  String _getCompletionPercentage() {
+    final completedOrders = (stats['completed_orders'] as int?) ?? 0;
+    final totalOrders = (stats['total_orders'] as int?) ?? 1;
 
-    final completedOrders = _dashboardData!['stats']['completed_orders'] as int;
-    totalOrders = _dashboardData!['stats']['total_orders'] as int;
+    if (totalOrders == 0) return '0.0';
 
     return ((completedOrders / totalOrders) * 100).toStringAsFixed(1);
   }
 
   Color _getCompletionColor() {
-    final completionRate = getCompletionPercentage();
+    final completionRate = double.tryParse(_getCompletionPercentage()) ?? 0.0;
 
-    if (completionRate >= 0.95) return Colors.green;
-    if (completionRate >= 0.80) return Colors.orange;
-    if (completionRate >= 0.70) return Colors.yellow;
+    if (completionRate >= 95) return Colors.green;
+    if (completionRate >= 80) return Colors.orange;
+    if (completionRate >= 70) return Colors.yellow;
     return Colors.red;
   }
 
-  String getCompletionPercentage() {
-    final completedOrders = _dashboardData!['stats']['completed_orders'] as int;
-    final totalOrders = _dashboard!['stats']['total_orders'] as int;
-
-    return ((completedOrders / totalOrders) * 100).toStringAsFixed(1));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        await _loadDashboardData();
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        },
-        child: _buildBody(),
-      ),
-    );
+  Color _getMetricColor(Metric metric) {
+    switch (metric) {
+      case Metric.REVENUE:
+        return Colors.green;
+      case Metric.GROWTH:
+        return Colors.blue;
+      case Metric.COMPLETED:
+        return Colors.green;
+      case Metric.CANCELLED:
+        return Colors.red;
+      case Metric.PENDING:
+        return Colors.orange;
+      case Metric.REFUNDED:
+        return Colors.purple;
+      case Metric.ERROR:
+        return Colors.red;
     }
   }
-
-    if (_dashboardData?['stats']?['low_stock_alerts'] > 0) {
-      _showLowStockAlert();
-    }
-
-    _dashboardData!['total_revenue'] ?? '';
-  }
-  }
-
-  void _showLowStockAlert() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      content: 'You have 5 products with low stock alerts. Restock inventory recommended',
-      backgroundColor: Colors.orange,
-      action: SnackBar(
-        content: 'Go to Inventory',
-        action: SnackBarAction(
-          label: 'View Inventory',
-          onPressed: () => _navigateToInventory(),
-        ),
-      ),
-      duration: const Duration(seconds: 5),
-    );
-  }
-
-  void _navigateToInventory() {
-    Navigator.pushNamed(context, '/inventory/low_stock_alerts');
-  }
-
-  Future<void> _loadDashboardData() async {
-    try {
-      final data = await _apiService.getDashboardData(role: _currentUser?.role ?? UserRole.FARMER);
-      if (mounted) {
-        setState(() {
-          _dashboardData = _mockDashboardData;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('Failed to load dashboard data: $e');
-      if (mounted) {
-        setState(() {
-          _dashboardData = _mockDashboardData;
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _loadDashboardData() async {
-    try {
-      // Load real data from Django API
-      final data = await _apiService.getDashboardData(role: _currentUser?.role ?? UserRole.FARMER);
-      if (mounted) {
-        setState(() {
-          _dashboardData = _mockDashboardData;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('Failed to load dashboard data: $e');
-      if (mounted) {
-        setState(() {
-          _dashboardData = _mockDashboardData;
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  final mockDashboardData = {
-    'stats': {
-      'total_orders': 45,
-      'completed_orders': 37,
-      'pending_orders': 8,
-      'total_revenue': '\$4,250.00',
-      'active_orders': 10,
-      'monthly_revenue': '\$850.00',
-      'average_rating': 4.8,
-      'active_listings': 8,
-      'saved_searches': 6,
-    },
-    'recent_orders': [
-      {
-        'id': '1',
-        'order_number': 'ORD-202401-01-001',
-        'product_name': 'Organic Tomatoes',
-        'quantity': '100 kg',
-        'total_amount': '$399.00',
-        'status': 'DELIVERED',
-        'created_at': '2024-01-01T10:30:00Z',
-        'delivery_date': '2024-01-03',
-        'rating': 5.0,
-      },
-      {
-        'id': '2',
-        'order_number': 'ORD-202401-02-002',
-        'product_name': 'Mixed Vegetables',
-        'quantity': '50 kg',
-        'total_amount': '\$175.00',
-        'status': 'PROCESSING',
-        'created_at': '2024-01-02T14:15:00Z',
-        'delivery_date': '2024-01-05',
-        'rating': 4.7,
-      },
-      {
-        'id': '3',
-        'order_number': 'ORD-202401-01-003',
-        'product_name': 'Fresh Lettuce',
-        'quantity': '150 kg',
-        'total_amount: '\$373.50',
-        'status': 'CONFIRMED',
-        'created_at': '2024-01-03T09:45:00Z',
-        'rating': 4.9,
-        'delivery_date': '2024-01-06',
-      },
-    ],
-  };
-  }
+}
